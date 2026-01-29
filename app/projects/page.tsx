@@ -108,7 +108,7 @@ export default function Projects() {
           className="text-7xl md:text-9xl font-light tracking-wider mb-32"
           style={{ color: theme === "dark" ? "#FDFDFD" : "#121212" }}
         >
-          Projekty
+          Realizacje
         </h1>
 
         {/* Bento Grid Layout */}

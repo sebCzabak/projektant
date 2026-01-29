@@ -45,36 +45,35 @@ html.dark body {
 
 /* Custom cursor styles - Desktop only */
 @media (hover: hover) and (pointer: fine) {
+  /* Biały kursor + difference = na ciemnym (navbar) widać biały, na jasnym (strona) widać czarny */
   .cursor-dot {
     width: 10px;
     height: 10px;
+    left: 0;
+    top: 0;
     background-color: #FDFDFD;
     border-radius: 50%;
     position: fixed;
     pointer-events: none;
     z-index: 99999;
     mix-blend-mode: difference;
-    transition: transform 0.2s ease-out, background-color 0.3s ease;
-  }
-
-  .light .cursor-dot {
-    background-color: #121212;
+    will-change: transform;
+    transition: background-color 0.2s ease;
   }
 
   .cursor-outline {
     width: 40px;
     height: 40px;
+    left: 0;
+    top: 0;
     border: 1px solid #FDFDFD;
     border-radius: 50%;
     position: fixed;
     pointer-events: none;
     z-index: 99998;
     mix-blend-mode: difference;
-    transition: all 0.3s ease-out, border-color 0.3s ease;
-  }
-
-  .light .cursor-outline {
-    border-color: #121212;
+    will-change: transform;
+    transition: border-color 0.2s ease;
   }
 }
 

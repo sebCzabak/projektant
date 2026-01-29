@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, ReactNode, useState } from "react";
+import { useEffect, useRef, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
-import { useTheme } from "@/contexts/ThemeContext";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -11,34 +10,34 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
-  const { theme } = useTheme();
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
   const prevPathname = useRef(pathname);
 
   useEffect(() => {
-    // Initial page load animation
-    if (isInitialMount.current && overlayRef.current && contentRef.current) {
+    const overlay = overlayRef.current;
+    const content = contentRef.current;
+    if (!overlay || !content) return;
+
+    // Zabicie poprzednich tweenów – brak nakładania i „clanky” po wielu przejściach
+    gsap.killTweensOf([overlay, content]);
+
+    if (isInitialMount.current) {
+      gsap.set(overlay, { y: "100%" });
+
       const tl = gsap.timeline();
-
-      // Start with overlay at bottom (not covering navbar)
-      gsap.set(overlayRef.current, { y: "100%" });
-
-      // Animate overlay out (revealing content) - faster
-      tl.to(overlayRef.current, {
+      tl.to(overlay, {
         y: "100%",
-        duration: 0.6,
+        duration: 1.35,
         ease: "power2.inOut",
       });
-
-      // Fade in content
       tl.from(
-        contentRef.current,
+        content,
         {
           opacity: 0,
-          y: 20,
-          duration: 0.5,
+          y: 28,
+          duration: 1.2,
           ease: "power2.out",
         },
         "-=0.3"
@@ -49,56 +48,50 @@ export default function PageTransition({ children }: PageTransitionProps) {
       return;
     }
 
-    // Page transition animation on route change
-    if (
-      !isInitialMount.current &&
-      prevPathname.current !== pathname &&
-      overlayRef.current &&
-      contentRef.current
-    ) {
-      const tl = gsap.timeline();
+    if (prevPathname.current === pathname) return;
 
-      // Animate overlay in (covering current page) - faster
-      tl.to(overlayRef.current, {
-        y: 0,
-        duration: 0.4,
-        ease: "power2.in",
-      });
-
-      // Animate overlay out (revealing new page)
-      tl.to(overlayRef.current, {
-        y: "100%",
-        duration: 0.5,
+    const tl = gsap.timeline();
+    tl.to(overlay, {
+      y: 0,
+      duration: 1.0,
+      ease: "power2.in",
+    });
+    tl.to({}, { duration: 0.75 }); // Logo widoczne 0,75 s
+    tl.to(overlay, {
+      y: "100%",
+      duration: 1.35,
+      ease: "power2.out",
+    });
+    tl.from(
+      content,
+      {
+        opacity: 0,
+        y: 28,
+        duration: 1.2,
         ease: "power2.out",
-      });
+      },
+      "-=0.3"
+    );
 
-      // Fade in new content
-      tl.from(
-        contentRef.current,
-        {
-          opacity: 0,
-          y: 20,
-          duration: 0.4,
-          ease: "power2.out",
-        },
-        "-=0.3"
-      );
-
-      prevPathname.current = pathname;
-    }
+    prevPathname.current = pathname;
   }, [pathname]);
 
   return (
     <>
-      {/* Page transition overlay - lower z-index than navbar */}
+      {/* Overlay tylko pod navbarem (navbar z-[100] zostaje nieruchomy) – loading z miejscem na logo */}
       <div
         ref={overlayRef}
-        className="fixed inset-0 z-[90] pointer-events-none transition-colors duration-300"
+        className="fixed left-0 right-0 bottom-0 z-[90] pointer-events-none flex items-center justify-center"
         style={{ 
+          top: "5rem",
           transform: "translateY(100%)",
-          backgroundColor: theme === "dark" ? "#121212" : "#FDFDFD"
+          backgroundColor: "#FDFDFD"
         }}
-      />
+      >
+        <div className="w-24 h-24 border border-[#121212]/20 rounded-sm flex items-center justify-center text-[#121212]/40 text-sm font-light tracking-widest uppercase">
+          Logo
+        </div>
+      </div>
       {/* Page content */}
       <div ref={contentRef} className="relative">
         {children}

@@ -24,13 +24,10 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('theme');
-                  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const isDark = theme === 'dark' || (!theme && systemPrefersDark);
-                  document.documentElement.classList.add(isDark ? 'dark' : 'light');
-                  document.documentElement.classList.remove(isDark ? 'light' : 'dark');
+                  document.documentElement.classList.add('light');
+                  document.documentElement.classList.remove('dark');
                 } catch (e) {
-                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.add('light');
                 }
               })();
             `,

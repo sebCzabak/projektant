@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -15,6 +16,27 @@ export default function Home() {
   const heroImageRef = useRef<HTMLDivElement>(null);
   const contentSectionRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const fillCircleRefs = useRef<(SVGCircleElement | null)[]>([]);
+  const clipPathRefs = useRef<(SVGPathElement | null)[]>([]);
+
+  // Helper function to create path for circle sector
+  const createSectorPath = (angle: number, clockwise: boolean = true) => {
+    const centerX = 100;
+    const centerY = 100;
+    const radius = 95;
+    const startAngle = -90; // Start from top (12 o'clock)
+    const endAngle = startAngle + (clockwise ? angle : -angle);
+    
+    const startX = centerX + radius * Math.cos((startAngle * Math.PI) / 180);
+    const startY = centerY + radius * Math.sin((startAngle * Math.PI) / 180);
+    const endX = centerX + radius * Math.cos((endAngle * Math.PI) / 180);
+    const endY = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
+    
+    const largeArcFlag = angle > 180 ? 1 : 0;
+    const sweepFlag = clockwise ? 1 : 0;
+    
+    return `M ${centerX},${centerY} L ${startX},${startY} A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${endX},${endY} Z`;
+  };
 
   useEffect(() => {
     let ctx = gsap.context(() => {
@@ -32,14 +54,14 @@ export default function Home() {
 
         gsap.to(wordSpans, {
           y: 0,
-          duration: 0.5,
+          duration: 1.5,
           stagger: 0.03,
           ease: "power2.out",
-          delay: 0.1,
+          delay: 0.2,
         });
       }
 
-      // Subtle Parallax Effect for Hero Image
+      // Subtle Parallax Effect for Hero Image – scrub łagodniejszy
       if (heroImageRef.current && heroRef.current) {
         gsap.to(heroImageRef.current, {
           yPercent: -20,
@@ -48,18 +70,18 @@ export default function Home() {
             trigger: heroRef.current,
             start: "top top",
             end: "bottom top",
-            scrub: true,
+            scrub: 1.5,
           },
         });
       }
 
-      // Image Reveal on Scroll
+      // Image Reveal on Scroll – dłuższe wykonanie animacji
       imageRefs.current.forEach((imageRef) => {
         if (imageRef) {
           gsap.from(imageRef, {
             y: 60,
             opacity: 0,
-            duration: 0.8,
+            duration: 1.35,
             ease: "power2.out",
             scrollTrigger: {
               trigger: imageRef,
@@ -148,7 +170,7 @@ export default function Home() {
             <img
               src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80&auto=format"
               alt="Project 1"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
             />
           </div>
           <div
@@ -161,7 +183,7 @@ export default function Home() {
             <img
               src="https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=800&q=80&auto=format"
               alt="Project 2"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
             />
           </div>
         </div>
@@ -175,6 +197,160 @@ export default function Home() {
             Każdy projekt to szansa na odkrycie nowych kreatywnych obszarów. 
             Wierzę w moc ruchu do opowiadania historii i wywoływania emocji.
           </p>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex flex-col sm:flex-row gap-12 pt-16 justify-center items-center">
+          <Link
+            href="/oferta"
+            className="group relative w-48 h-48 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-105"
+            style={{
+              color: theme === "dark" ? "#FDFDFD" : "#121212",
+            }}
+            onMouseEnter={() => {
+              if (clipPathRefs.current[0]) {
+                const angleObj = { angle: 0 };
+                gsap.to(angleObj, {
+                  angle: 360,
+                  duration: 0.95,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                    if (clipPathRefs.current[0]) {
+                      clipPathRefs.current[0].setAttribute("d", createSectorPath(angleObj.angle, true));
+                    }
+                  },
+                });
+              }
+            }}
+            onMouseLeave={() => {
+              if (clipPathRefs.current[0]) {
+                const angleObj = { angle: 360 };
+                gsap.to(angleObj, {
+                  angle: 0,
+                  duration: 0.95,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                    if (clipPathRefs.current[0]) {
+                      clipPathRefs.current[0].setAttribute("d", createSectorPath(angleObj.angle, true));
+                    }
+                  },
+                });
+              }
+            }}
+          >
+            {/* SVG Circle - Clockwise Animation (right) */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 200 200"
+            >
+              <defs>
+                <clipPath id="clip-circle-1">
+                  <path
+                    ref={(el) => {
+                      clipPathRefs.current[0] = el;
+                    }}
+                    d={createSectorPath(0, true)}
+                  />
+                </clipPath>
+              </defs>
+              <circle
+                cx="100"
+                cy="100"
+                r="95"
+                fill="none"
+                stroke={theme === "dark" ? "#808080" : "#808080"}
+                strokeWidth="2"
+              />
+              <circle
+                ref={(el) => {
+                  fillCircleRefs.current[0] = el;
+                }}
+                cx="100"
+                cy="100"
+                r="95"
+                fill={theme === "dark" ? "#121212" : "#FDFDFD"}
+                clipPath="url(#clip-circle-1)"
+              />
+            </svg>
+            <span className="text-sm font-light tracking-wide text-center px-4 z-10 relative">
+              Zapoznaj się z ofertą
+            </span>
+          </Link>
+          <Link
+            href="/projects"
+            className="group relative w-48 h-48 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-105"
+            style={{
+              color: theme === "dark" ? "#FDFDFD" : "#121212",
+            }}
+            onMouseEnter={() => {
+              if (clipPathRefs.current[1]) {
+                const angleObj = { angle: 0 };
+                gsap.to(angleObj, {
+                  angle: 360,
+                  duration: 0.95,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                    if (clipPathRefs.current[1]) {
+                      clipPathRefs.current[1].setAttribute("d", createSectorPath(angleObj.angle, false));
+                    }
+                  },
+                });
+              }
+            }}
+            onMouseLeave={() => {
+              if (clipPathRefs.current[1]) {
+                const angleObj = { angle: 360 };
+                gsap.to(angleObj, {
+                  angle: 0,
+                  duration: 0.95,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                    if (clipPathRefs.current[1]) {
+                      clipPathRefs.current[1].setAttribute("d", createSectorPath(angleObj.angle, false));
+                    }
+                  },
+                });
+              }
+            }}
+          >
+            {/* SVG Circle - Counter-clockwise Animation (left) */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 200 200"
+            >
+              <defs>
+                <clipPath id="clip-circle-2">
+                  <path
+                    ref={(el) => {
+                      clipPathRefs.current[1] = el;
+                    }}
+                    d={createSectorPath(0, false)}
+                  />
+                </clipPath>
+              </defs>
+              <circle
+                cx="100"
+                cy="100"
+                r="95"
+                fill="none"
+                stroke={theme === "dark" ? "#808080" : "#808080"}
+                strokeWidth="2"
+              />
+              <circle
+                ref={(el) => {
+                  fillCircleRefs.current[1] = el;
+                }}
+                cx="100"
+                cy="100"
+                r="95"
+                fill={theme === "dark" ? "#121212" : "#FDFDFD"}
+                clipPath="url(#clip-circle-2)"
+              />
+            </svg>
+            <span className="text-sm font-light tracking-wide text-center px-4 z-10 relative">
+              Zapoznaj się z projektami
+            </span>
+          </Link>
         </div>
       </section>
     </main>

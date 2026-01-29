@@ -18,43 +18,13 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // Always start with "dark" on server to match initial HTML class
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window === "undefined") return;
-    
-    // Check localStorage or system preference
-    try {
-      const savedTheme = localStorage.getItem("theme") as Theme;
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-
-      let initialTheme: Theme = "dark";
-      if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
-        initialTheme = savedTheme;
-      } else {
-        initialTheme = systemPrefersDark ? "dark" : "light";
-      }
-
-      // Check what class is already on html (set by script tag)
-      const htmlHasDark = document.documentElement.classList.contains("dark");
-      const htmlHasLight = document.documentElement.classList.contains("light");
-      
-      // Sync with what's already on the page
-      if (htmlHasDark) {
-        setTheme("dark");
-      } else if (htmlHasLight) {
-        setTheme("light");
-      } else {
-        setTheme(initialTheme);
-      }
-    } catch (error) {
-      setTheme("dark");
-    }
-    
+    // Biała strona, navbar zawsze czarny (navbar ma własny styl)
+    setTheme("light");
     setMounted(true);
   }, []);
 

@@ -4,17 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "@/contexts/ThemeContext";
+// import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { theme, mounted } = useTheme();
   const navRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLAnchorElement[]>([]);
-  
-  // Get theme from HTML class if not mounted yet (SSR)
-  const currentTheme = mounted ? theme : (typeof window !== "undefined" && document.documentElement.classList.contains("light") ? "light" : "dark");
 
   useEffect(() => {
     // Ensure navbar is always visible - no animation that could hide it
@@ -34,16 +29,18 @@ export default function Navbar() {
       const handleMouseEnter = () => {
         gsap.to(link, {
           scale: 1.1,
-          duration: 0.3,
+          duration: 0.18,
           ease: "power2.out",
+          overwrite: true,
         });
       };
 
       const handleMouseLeave = () => {
         gsap.to(link, {
           scale: 1,
-          duration: 0.3,
+          duration: 0.18,
           ease: "power2.out",
+          overwrite: true,
         });
       };
 
@@ -59,7 +56,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/projects", label: "Projects" },
+    { href: "/projects", label: "Realizacje" },
     { href: "/oferta", label: "Oferta" },
     { href: "/about", label: "About" },
     { href: "/kontakt", label: "Kontakt" },
@@ -77,15 +74,15 @@ export default function Navbar() {
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: currentTheme === "dark" ? "rgba(18, 18, 18, 0.95)" : "rgba(253, 253, 253, 0.95)",
-        borderColor: currentTheme === "dark" ? "rgba(128, 128, 128, 0.3)" : "rgba(128, 128, 128, 0.2)"
+        backgroundColor: "rgba(18, 18, 18, 0.95)",
+        borderColor: "rgba(128, 128, 128, 0.3)"
       }}
     >
       <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
         <Link
           href="/"
           className="text-2xl font-light tracking-wider hover:text-accent transition-colors duration-300"
-          style={{ color: currentTheme === "dark" ? "#FDFDFD" : "#121212" }}
+          style={{ color: "#FDFDFD" }}
         >
           Logo
         </Link>
@@ -97,29 +94,25 @@ export default function Navbar() {
               ref={(el) => {
                 if (el) linksRef.current[index] = el;
               }}
-              className="group relative text-sm font-light tracking-widest uppercase transition-colors duration-300"
+              className={`group relative text-sm tracking-widest uppercase transition-colors duration-300 ${pathname === link.href ? "font-semibold" : "font-light"}`}
               style={{ 
-                color: pathname === link.href 
-                  ? (currentTheme === "dark" ? "#FDFDFD" : "#121212")
-                  : "#808080"
+                color: pathname === link.href ? "#FDFDFD" : "#b0b0b0"
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = currentTheme === "dark" ? "#FDFDFD" : "#121212";
+                e.currentTarget.style.color = "#FDFDFD";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = pathname === link.href 
-                  ? (currentTheme === "dark" ? "#FDFDFD" : "#121212")
-                  : "#808080";
+                e.currentTarget.style.color = pathname === link.href ? "#FDFDFD" : "#b0b0b0";
               }}
             >
               {link.label}
               <span 
                 className="absolute bottom-0 left-0 w-0 h-px transition-all duration-300 group-hover:w-full"
-                style={{ backgroundColor: currentTheme === "dark" ? "#FDFDFD" : "#121212" }}
+                style={{ backgroundColor: "#FDFDFD" }}
               />
             </Link>
           ))}
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
         </div>
       </div>
     </nav>
